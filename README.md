@@ -4,6 +4,10 @@ This Insomnia plugin enables easy authentication againsts [https://oidc.plus4.ne
 
 You can either install the plugin from <https://www.npmjs.com/package/insomnia-plugin-oidc-plus4u> or you can clone the git repository to Insomnia plugin folder. You can find more information at <https://support.insomnia.rest/article/26-plugins>.
 
+# Update
+
+Just install plugin again. New version replaces the old version.
+
 # How to use ? 
 
 The plugin register [Template Tag](https://support.insomnia.rest/article/40-template-tags) with name "Token from oidc.plus4u.net". You can use this template tag anywhere you can use environment variable (even in the environment configuration). In tag configuration you can specify choose to prompt for access codes or specify the accessCode1 and accessCode2 (and you also see obtained token in the Live preview). Please note that access codes specified in the configuration are stored in wokrspace as plain text.
