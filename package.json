@@ -1,6 +1,6 @@
 {
   "name": "insomnia-plugin-oidc-plus4u",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "Insomnia plugin that provides easy authentication against oidc.plus4u.net .",
   "main": "plugin.js",
   "repository": "https://github.com/jiridudekusy/insomnia-plugin-oidc-plus4u",
@@ -13,5 +13,8 @@
     "node-cache": "^4.2.0",
     "r2": "^2.0.0"
   },
-  "keywords": ["insomnia", "plus4u"]
+  "keywords": [
+    "insomnia",
+    "plus4u"
+  ]
 }

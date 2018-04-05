@@ -3,7 +3,7 @@
  * between a user-provided MIN and MAX
  */
 const r2 = require('r2');
-const NodeCache = require( "node-cache" );
+const NodeCache = require("node-cache");
 
 module.exports.templateTags = [{
   name: 'plus4uToken',
@@ -19,22 +19,66 @@ module.exports.templateTags = [{
       displayName: 'Access Code 2',
       description: 'Access Code 2',
       type: 'string'
+    },
+    {
+      displayName: 'Prompt ad-hoc',
+      type: 'boolean',
+      defaultValue: true
+    },
+    {
+      displayName: 'Prompt user identification',
+      type: 'string',
+      help: `Identification to distinguish prompts for multiple different users. Please note that this information is shared accross the application in all 
+      prompts. So in case that you hve multiplmet prompts with the same identification, they will share the token and access codes.`
     }
   ],
-  cache: new NodeCache({stdTTL: 10*60, checkperiod: 60}),
-  async run(context, accessCode1, accessCode2) {
-    let key = `${accessCode1}:${accessCode2}`;
-    let resp = this.cache.get(key);
-    if(!resp) {
-      let credentials = {
-        accessCode1,
-        accessCode2,
-        grant_type: "password"
-      };
-      resp = await r2.post("https://oidc.plus4u.net/uu-oidcg01-main/0-0/grantToken", {json: credentials}).json;
-      console.log(`New token obtained : ${JSON.stringify(resp)}`);
-      this.cache.set(key, resp)
+  oidcTokenCache: new NodeCache({stdTTL: 10 * 60, checkperiod: 60}),
+  accessCodesStore: new Map(),
+
+  async login(accessCode1, accessCode2) {
+    if (accessCode1.length === 0 || accessCode2.length === 0) {
+      throw `Access code cannot be empty. Ignore this error for "Prompt ad-hoc".`;
+    }
+    let credentials = {
+      accessCode1,
+      accessCode2,
+      grant_type: "password"
+    };
+    let resp = await r2.post("https://oidc.plus4u.net/uu-oidcg01-main/0-0/grantToken", {json: credentials}).json;
+    if (Object.keys(resp.uuAppErrorMap).length > 0) {
+      throw "Cannot login to oidc.plus4u.net. Probabaly invalid combination of Access Code 1 and Access Code 2.";
     }
     return resp.id_token;
+  },
+
+  async run(context, accessCode1, accessCode2, prompt, identification) {
+    if (prompt) {
+      if (this.oidcTokenCache.get(identification)) {
+        return this.oidcTokenCache.get(identification);
+      }
+      let ac1;
+      let ac2;
+      if (this.accessCodesStore.get(identification)) {
+        ac1 = this.accessCodesStore.get(identification).accessCode1;
+        ac2 = this.accessCodesStore.get(identification).accessCode2;
+      } else {
+        ac1 = await context.app.prompt('Access code 1', {label: "Access Code 1 for user " + identification});
+        ac2 = await context.app.prompt('Access code 2', {label: "Access Code 2 for user " + identification});
+        console.log(`Using ${ac1} and ${ac2} for user ${identification}.`);
+      }
+      let token = await this.login(ac1, ac2);
+      console.log(`Obtained new token for for user ${identification} : ${token}`);
+      this.accessCodesStore.set(identification, {accessCode1: ac1, accessCode2: ac2});
+      this.oidcTokenCache.set(identification, token);
+      return token;
+    } else {
+      let key = `${accessCode1}:${accessCode2}`;
+      let token = this.oidcTokenCache.get(key);
+      if (!token) {
+        let token = await this.login(accessCode1,accessCode2);
+        this.oidcTokenCache.set(key, token)
+      }
+      return token;
+    }
   }
 }];
