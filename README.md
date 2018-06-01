@@ -1,4 +1,6 @@
-This Insomnia plugin enables easy authentication againsts [https://oidc.plus4.net](https://oidc.plus4u.net/uu-oidcg01-main/99923616732452117-4f06dafc03cb4c7f8c155aa53f0e86be). 
+This Insomnia plugin enables easy authentication againsts [https://oidc.plus4.net](https://oidc.plus4u.net/uu-oidcg01-main/99923616732452117-4f06dafc03cb4c7f8c155aa53f0e86be).
+
+[Changelog](CHANGELOG.md) 
 
 # Installation
 
@@ -10,7 +12,7 @@ Just install plugin again. New version replaces the old version.
 
 # How to use ? 
 
-The plugin register [Template Tag](https://support.insomnia.rest/article/40-template-tags) with name "Token from oidc.plus4u.net". You can use this template tag anywhere you can use environment variable (even in the environment configuration). In tag configuration you can specify choose to prompt for access codes or specify the accessCode1 and accessCode2 (and you also see obtained token in the Live preview). Please note that access codes specified in the configuration are stored in wokrspace as plain text.
+The plugin register [Template Tag](https://support.insomnia.rest/article/40-template-tags) with name "Token from oidc.plus4u.net". You can use this template tag anywhere you can use environment variable (even in the environment configuration). In tag configuration you can specify choose to prompt for access codes or specify the accessCode1 and accessCode2 (and you also see obtained token in the Live preview). Prompting for access codes is realiazed via password inputs, so nobody will see your acess codes. Please note that access codes specified in the configuration are stored in wokrspace as plain text.
 
 # Features
 

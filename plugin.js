@@ -5,6 +5,7 @@
 const r2 = require('r2');
 const NodeCache = require("node-cache");
 
+
 module.exports.templateTags = [{
   name: 'plus4uToken',
   displayName: 'Token from oidc.plus4u.net',
@@ -28,7 +29,7 @@ module.exports.templateTags = [{
     {
       displayName: 'Prompt user identification',
       type: 'string',
-      help: `Identification to distinguish prompts for multiple different users. Please note that this information is shared accross the application in all 
+      help: `Identification to distinguish prompts for multiple different users. Please note that this information is shared accross the application in all
       prompts. So in case that you hve multiplmet prompts with the same identification, they will share the token and access codes.`
     }
   ],
@@ -62,8 +63,8 @@ module.exports.templateTags = [{
         ac1 = this.accessCodesStore.get(identification).accessCode1;
         ac2 = this.accessCodesStore.get(identification).accessCode2;
       } else {
-        ac1 = await context.app.prompt('Access code 1', {label: "Access Code 1 for user " + identification});
-        ac2 = await context.app.prompt('Access code 2', {label: "Access Code 2 for user " + identification});
+        ac1 = await context.app.prompt('Access code 1', {label: "Access Code 1 for user " + identification, inputType: "password"});
+        ac2 = await context.app.prompt('Access code 2', {label: "Access Code 2 for user " + identification, inputType: "password"});
         console.log(`Using ${ac1} and ${ac2} for user ${identification}.`);
       }
       let token = await this.login(ac1, ac2);
