@@ -17,6 +17,7 @@ The plugin register [Template Tag](https://support.insomnia.rest/article/40-temp
 # Features
 
 - easy Insomnia authentication against <https://oidc.plus4.net>
+- **New**:  Integrated `oidc-plus4u-vault`. If plugin detects that you have vault file, it will try to find credetials in the file(after asking for password). 
 - support of multiple identites (credentials can be configured for each use of the template tag)
 - cache (all valid tokens are cached, the TTL is 10 minutes)
 

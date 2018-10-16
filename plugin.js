@@ -4,7 +4,7 @@
  */
 const r2 = require('r2');
 const NodeCache = require("node-cache");
-
+const secureStore = require("oidc-plus4u-vault/lib/securestore");
 
 module.exports.templateTags = [{
   name: 'plus4uToken',
@@ -35,6 +35,7 @@ module.exports.templateTags = [{
   ],
   oidcTokenCache: new NodeCache({stdTTL: 10 * 60, checkperiod: 60}),
   accessCodesStore: new Map(),
+  vaultPassword: null,
 
   async login(accessCode1, accessCode2) {
     if (accessCode1.length === 0 || accessCode2.length === 0) {
@@ -63,8 +64,32 @@ module.exports.templateTags = [{
         ac1 = this.accessCodesStore.get(identification).accessCode1;
         ac2 = this.accessCodesStore.get(identification).accessCode2;
       } else {
-        ac1 = await context.app.prompt('Access code 1', {label: "Access Code 1 for user " + identification, inputType: "password"});
-        ac2 = await context.app.prompt('Access code 2', {label: "Access Code 2 for user " + identification, inputType: "password"});
+        if (secureStore.exists()) {
+          if (!this.vaultPassword) {
+            let password;
+            password = await context.app.prompt('OIDC vault password', {label: "OIDC vault password", inputType: "password"});
+            if (password) {
+              try {
+                secureStore.read(password);
+                this.vaultPassword = password;
+              } catch (e) {
+                console.error("Invalid vault password.");
+                console.error(e);
+              }
+            }
+          }
+          if (this.vaultPassword) {
+            let vault = secureStore.read(this.vaultPassword);
+            if (vault[identification]) {
+              ac1 = vault[identification].ac1;
+              ac2 = vault[identification].ac2;
+            }
+          }
+        }
+        if (!ac1) {
+          ac1 = await context.app.prompt('Access code 1', {label: "Access Code 1 for user " + identification, inputType: "password"});
+          ac2 = await context.app.prompt('Access code 2', {label: "Access Code 2 for user " + identification, inputType: "password"});
+        }
         console.log(`Using ${ac1} and ${ac2} for user ${identification}.`);
       }
       let token = await this.login(ac1, ac2);
@@ -76,7 +101,7 @@ module.exports.templateTags = [{
       let key = `${accessCode1}:${accessCode2}`;
       let token = this.oidcTokenCache.get(key);
       if (!token) {
-        let token = await this.login(accessCode1,accessCode2);
+        let token = await this.login(accessCode1, accessCode2);
         this.oidcTokenCache.set(key, token)
       }
       return token;
