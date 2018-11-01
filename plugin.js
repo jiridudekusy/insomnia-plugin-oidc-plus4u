@@ -30,14 +30,21 @@ module.exports.templateTags = [{
       displayName: 'Prompt user identification',
       type: 'string',
       help: `Identification to distinguish prompts for multiple different users. Please note that this information is shared accross the application in all
-      prompts. So in case that you hve multiplmet prompts with the same identification, they will share the token and access codes.`
+      prompts. So in case that you hve multiple prompts with the same identification, they will share the token and access codes.`
+    },
+    {
+      displayName: 'OIDC Server',
+      type: 'string',
+      defaultValue: "https://oidc.plus4u.net/uu-oidcg01-main/0-0",
+      help: `URL of the OIDC server.
+      `
     }
   ],
   oidcTokenCache: new NodeCache({stdTTL: 10 * 60, checkperiod: 60}),
   accessCodesStore: new Map(),
   vaultPassword: null,
 
-  async login(accessCode1, accessCode2) {
+  async login(accessCode1, accessCode2, oidcServer) {
     if (accessCode1.length === 0 || accessCode2.length === 0) {
       throw `Access code cannot be empty. Ignore this error for "Prompt ad-hoc".`;
     }
@@ -46,14 +53,24 @@ module.exports.templateTags = [{
       accessCode2,
       grant_type: "password"
     };
-    let resp = await r2.post("https://oidc.plus4u.net/uu-oidcg01-main/0-0/grantToken", {json: credentials}).json;
+    let tokenEndpoint = await this.getTokenEndpoint(oidcServer);
+    let resp = await r2.post(tokenEndpoint, {json: credentials}).json;
     if (Object.keys(resp.uuAppErrorMap).length > 0) {
-      throw "Cannot login to oidc.plus4u.net. Probabaly invalid combination of Access Code 1 and Access Code 2.";
+      throw `Cannot login to OIDC server on ${oidcServer}. Probably invalid combination of Access Code 1 and Access Code 2.`;
     }
     return resp.id_token;
   },
 
-  async run(context, accessCode1, accessCode2, prompt, identification) {
+  async getTokenEndpoint(oidcServer) {
+    let oidcServerConfigUrl = oidcServer + "/.well-known/openid-configuration";
+    let oidcConfig = await r2.get(oidcServerConfigUrl).json;
+    if (Object.keys(oidcConfig.uuAppErrorMap).length > 0) {
+      throw `Cannot get configuration of OIDC server on ${oidcServer}. Probably invalid URL.`;
+    }
+    return oidcConfig.token_endpoint;
+  },
+
+  async run(context, accessCode1, accessCode2, prompt, identification, oidcServer) {
     if (prompt) {
       if (this.oidcTokenCache.get(identification)) {
         return this.oidcTokenCache.get(identification);
@@ -92,7 +109,7 @@ module.exports.templateTags = [{
         }
         console.log(`Using ${ac1} and ${ac2} for user ${identification}.`);
       }
-      let token = await this.login(ac1, ac2);
+      let token = await this.login(ac1, ac2, oidcServer);
       console.log(`Obtained new token for for user ${identification} : ${token}`);
       this.accessCodesStore.set(identification, {accessCode1: ac1, accessCode2: ac2});
       this.oidcTokenCache.set(identification, token);
@@ -101,7 +118,7 @@ module.exports.templateTags = [{
       let key = `${accessCode1}:${accessCode2}`;
       let token = this.oidcTokenCache.get(key);
       if (!token) {
-        let token = await this.login(accessCode1, accessCode2);
+        let token = await this.login(accessCode1, accessCode2, oidcServer);
         this.oidcTokenCache.set(key, token)
       }
       return token;
