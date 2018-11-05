@@ -71,6 +71,9 @@ module.exports.templateTags = [{
   },
 
   async run(context, accessCode1, accessCode2, prompt, identification, oidcServer) {
+    if(!oidcServer) {
+      oidcServer = "https://oidc.plus4u.net/uu-oidcg01-main/0-0";
+    }
     if (prompt) {
       if (this.oidcTokenCache.get(identification)) {
         return this.oidcTokenCache.get(identification);

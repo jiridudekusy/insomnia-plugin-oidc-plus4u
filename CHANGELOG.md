@@ -1,3 +1,9 @@
+0.5.1
+-----
+
+- Fix error when using opld workspaces (no oids server attribute) 
+
+
 0.5.0
 -----
 
