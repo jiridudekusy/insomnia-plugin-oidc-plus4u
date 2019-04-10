@@ -1,3 +1,7 @@
+0.6.0
+-----
+- support for lazy authentication. Only required token is obtained when request is executed.  
+
 0.5.1
 -----
 
