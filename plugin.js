@@ -19,8 +19,9 @@ async function getToken(context, accessCode1, accessCode2, prompt, identificatio
     oidcServer = "https://oidc.plus4u.net/uu-oidcg01-main/0-0";
   }
   if (prompt) {
-    if (oidcTokenCache.get(identification)) {
-      return oidcTokenCache.get(identification);
+    let tokenCacheKey = oidcServer + identification;
+    if (oidcTokenCache.get(tokenCacheKey)) {
+      return oidcTokenCache.get(tokenCacheKey);
     }
     let ac1;
     let ac2;
@@ -58,10 +59,10 @@ async function getToken(context, accessCode1, accessCode2, prompt, identificatio
     let token = await login(ac1, ac2, oidcServer);
     console.log(`Obtained new token for for user ${identification} : ${token}`);
     accessCodesStore.set(identification, {accessCode1: ac1, accessCode2: ac2});
-    oidcTokenCache.set(identification, token);
+    oidcTokenCache.set(tokenCacheKey, token);
     return token;
   } else {
-    let key = `${accessCode1}:${accessCode2}`;
+    let key = `${oidcServer}${accessCode1}:${accessCode2}`;
     let token = oidcTokenCache.get(key);
     if (!token) {
       let token = await login(accessCode1, accessCode2, oidcServer);

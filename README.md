@@ -24,3 +24,8 @@ The plugin register [Template Tag](https://support.insomnia.rest/article/40-temp
 # Limitations
 
 - if you specify access codes in configuration, your login information is part of insomnia configuration in **plain text** (so **never** share the workspace with this plugin to other people). It is recommended that you use this template tag only in environment variables and you clear the environment before sharing
+
+# Changelog
+
+## 0.6.1
+- use user identification plus oidcServer url as cache for token cache to support multiple oidc servers
