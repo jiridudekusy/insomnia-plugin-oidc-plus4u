@@ -16,7 +16,7 @@ let vaultPassword = null;
 
 async function getToken(context, accessCode1, accessCode2, prompt, identification, oidcServer) {
   if (!oidcServer) {
-    oidcServer = "https://oidc.plus4u.net/uu-oidcg01-main/0-0";
+    oidcServer = "https://uuidentity.plus4u.net/uu-oidc-maing02/bb977a99f4cc4c37a2afce3fd599d0a7/oidc";
   }
   if (prompt) {
     let tokenCacheKey = oidcServer + identification;

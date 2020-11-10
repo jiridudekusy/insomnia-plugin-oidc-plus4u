@@ -27,5 +27,8 @@ The plugin register [Template Tag](https://support.insomnia.rest/article/40-temp
 
 # Changelog
 
+## 0.7.0
+- use oidcg02(https://uuidentity.plus4u.net/uu-oidc-maing02/bb977a99f4cc4c37a2afce3fd599d0a7/oidc) as default
+
 ## 0.6.1
 - use user identification plus oidcServer url as cache for token cache to support multiple oidc servers
